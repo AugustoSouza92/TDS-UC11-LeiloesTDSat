@@ -34,6 +34,85 @@ public class ProdutosDAO {
         
     }
     
+    
+    public boolean venderProduto(int idProduto) {
+      
+     
+        
+        String sql = "UPDATE produtos SET status = ? WHERE id_produto = ?";
+
+        try 
+            // Estabelece a conexão com o banco de dados
+            (Connection conn = new conectaDAO().connectDB();
+            PreparedStatement stmt = conn.prepareStatement(sql)){
+        
+            stmt.setString(1, "Vendido"); // Define o status como "Vendido"
+            stmt.setInt(2, idProduto); // Define o id do produto a ser atualizado
+
+            int rowsAffected = stmt.executeUpdate();
+
+            // Se a atualização afetou uma linha, a operação foi bem-sucedida
+            if (rowsAffected > 0) {
+                sucesso = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return sucesso;
+    }
+
+    // Método para listar todos os produtos com status "Vendido"
+    public listagem<Produto> listarProdutosVendidos() {
+        listagem<Produto> produtosVendidos = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            // Estabelece a conexão com o banco de dados
+            conn = ConnectionFactory.getConnection(); // Altere conforme sua classe de conexão
+            String sql = "SELECT * FROM produtos WHERE status = ?";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "Vendido");
+
+            rs = stmt.executeQuery();
+
+            // Adiciona os produtos vendidos à lista
+            while (rs.next()) {
+                Produto produto = new Produto();
+                produto.setId(rs.getInt("id_produto"));
+                produto.setNome(rs.getString("nome"));
+                produto.setStatus(rs.getString("status"));
+                // Adicione outros campos do produto conforme necessário
+
+                produtosVendidos.add(produto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return produtosVendidos;
+    }
+
+        
+    
     public ArrayList<ProdutosDTO> listarProdutos() {
     String sql = "SELECT * FROM produtos"; // Consulta para buscar todos os produtos
     ArrayList<ProdutosDTO> listagem = new ArrayList<>();
