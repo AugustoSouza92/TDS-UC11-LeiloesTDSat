@@ -3,17 +3,17 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 
-/**
- *
- * @author Adm
- */
+
 public class listagemVIEW extends javax.swing.JFrame {
 
+    private static Object getValueAt(int linhaSelecionada, int i) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    private static int getSelectedRow() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     /**
      * Creates new form listagemVIEW
      */
@@ -137,17 +137,44 @@ public class listagemVIEW extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnVenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVenderActionPerformed
-        String id = id_produto_venda.getText();
-        
-        ProdutosDAO produtosdao = new ProdutosDAO();
-        
-        //produtosdao.venderProduto(Integer.parseInt(id));
-        listarProdutos();
+    int linhaSelecionada = listagemVIEW.getSelectedRow();
+
+    if (linhaSelecionada >= 0) {
+      
+        try {
+            ProdutosDAO produtosdao = new ProdutosDAO();
+            
+             DefaultTableModel model = (DefaultTableModel) listaProdutos.getModel();
+             model.setNumRows(0);
+             
+            Object idObj = listagemVIEW.getValueAt(linhaSelecionada, 0);  
+            if (idObj instanceof Integer) {
+             int produtoId = (int) idObj; 
+              
+               
+                
+              produtosdao.venderProduto(produtoId);
+                
+          
+                listarProdutos();
+
+                JOptionPane.showMessageDialog(this, "Produto vendido com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(this, "ID do produto não encontrado.");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao vender produto: " + e.getMessage());
+        }
+    } else {
+        JOptionPane.showMessageDialog(this, "Por favor, selecione um produto para vender.");
+    }
+
+
     }//GEN-LAST:event_btnVenderActionPerformed
 
     private void btnVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVendasActionPerformed
-        //vendasVIEW vendas = new vendasVIEW(); 
-        //vendas.setVisible(true);
+        Vendas vendas = new Vendas(); 
+        vendas.setVisible(true);
     }//GEN-LAST:event_btnVendasActionPerformed
 
     private void btnVoltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoltarActionPerformed

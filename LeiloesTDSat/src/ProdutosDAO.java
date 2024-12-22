@@ -70,43 +70,27 @@ public class ProdutosDAO {
     
     public ArrayList<ProdutosDTO> listarProdutosVendidos() {
         String sql = "SELECT * FROM produtos WHERE status = ?";
-        ArrayList<ProdutosDTO> produtosVendidos = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = new conectaDAO().connectDB();  // Obtém a conexão com o banco de dados
-            stmt = conn.prepareStatement(sql);    // Prepara a consulta SQL
-            stmt.setString(1, "Vendido");         // Filtra os produtos com status "Vendido"
-
-            rs = stmt.executeQuery();             // Executa a consulta
-
-            // Itera sobre os resultados e os adiciona à lista
-            while (rs.next()) {
+        ArrayList<ProdutosDTO> listagem = new ArrayList<>();
+        
+        try (Connection conn = new conectaDAO().connectDB();
+             PreparedStatement prep = conn.prepareStatement(sql);
+             ResultSet resultset = prep.executeQuery()) {
+            
+            while (resultset.next()) {
                 ProdutosDTO produto = new ProdutosDTO();
-                produto.setId(rs.getInt("id"));
-                produto.setNome(rs.getString("nome"));
-                produto.setValor(rs.getInt("valor"));
-                produto.setStatus(rs.getString("status"));
-                produtosVendidos.add(produto);
+                produto.setId(resultset.getInt("id"));
+                produto.setNome(resultset.getString("nome"));
+                produto.setValor(resultset.getInt("valor"));
+                produto.setStatus(resultset.getString("status"));
+                listagem.add(produto);
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Erro ao listar produtos vendidos: " + e.getMessage());
-        } finally {
-            // Fechar os recursos
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Erro ao fechar os recursos: " + e.getMessage());
-            }
         }
-
-        return produtosVendidos;
+        
+        return listagem;
     }
+
 
     
     public ArrayList<ProdutosDTO> listarProdutos() {
