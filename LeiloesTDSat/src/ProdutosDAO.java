@@ -34,84 +34,80 @@ public class ProdutosDAO {
         
     }
     
-    
-    public boolean venderProduto(int idProduto) {
-      
-     
-        
-        String sql = "UPDATE produtos SET status = ? WHERE id_produto = ?";
+    public void venderProduto(int produtoId) {
+        String sql = "UPDATE produtos SET status = ? WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
 
-        try 
-            // Estabelece a conexão com o banco de dados
-            (Connection conn = new conectaDAO().connectDB();
-            PreparedStatement stmt = conn.prepareStatement(sql)){
-        
-            stmt.setString(1, "Vendido"); // Define o status como "Vendido"
-            stmt.setInt(2, idProduto); // Define o id do produto a ser atualizado
+        try {
+            conn = new conectaDAO().connectDB();  // Obtém a conexão com o banco de dados
+            stmt = conn.prepareStatement(sql);    // Prepara a consulta SQL
 
+            // Definir os parâmetros da consulta
+            stmt.setString(1, "Vendido");  // Atualiza o status para "Vendido"
+            stmt.setInt(2, produtoId);     // Filtra pelo ID do produto
+
+            // Executa a atualização no banco de dados
             int rowsAffected = stmt.executeUpdate();
-
-            // Se a atualização afetou uma linha, a operação foi bem-sucedida
             if (rowsAffected > 0) {
-                sucesso = true;
+                JOptionPane.showMessageDialog(null, "Produto vendido com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Produto não encontrado.");
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erro ao vender produto: " + e.getMessage());
         } finally {
+            // Fechar os recursos
             try {
                 if (stmt != null) stmt.close();
                 if (conn != null) conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Erro ao fechar os recursos: " + e.getMessage());
             }
         }
-
-        return sucesso;
     }
-
-    // Método para listar todos os produtos com status "Vendido"
-    public listagem<Produto> listarProdutosVendidos() {
-        listagem<Produto> produtosVendidos = new ArrayList<>();
+    
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+        String sql = "SELECT * FROM produtos WHERE status = ?";
+        ArrayList<ProdutosDTO> produtosVendidos = new ArrayList<>();
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-            // Estabelece a conexão com o banco de dados
-            conn = ConnectionFactory.getConnection(); // Altere conforme sua classe de conexão
-            String sql = "SELECT * FROM produtos WHERE status = ?";
+            conn = new conectaDAO().connectDB();  // Obtém a conexão com o banco de dados
+            stmt = conn.prepareStatement(sql);    // Prepara a consulta SQL
+            stmt.setString(1, "Vendido");         // Filtra os produtos com status "Vendido"
 
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, "Vendido");
+            rs = stmt.executeQuery();             // Executa a consulta
 
-            rs = stmt.executeQuery();
-
-            // Adiciona os produtos vendidos à lista
+            // Itera sobre os resultados e os adiciona à lista
             while (rs.next()) {
-                Produto produto = new Produto();
-                produto.setId(rs.getInt("id_produto"));
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(rs.getInt("id"));
                 produto.setNome(rs.getString("nome"));
+                produto.setValor(rs.getInt("valor"));
                 produto.setStatus(rs.getString("status"));
-                // Adicione outros campos do produto conforme necessário
-
                 produtosVendidos.add(produto);
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erro ao listar produtos vendidos: " + e.getMessage());
         } finally {
+            // Fechar os recursos
             try {
                 if (rs != null) rs.close();
                 if (stmt != null) stmt.close();
                 if (conn != null) conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Erro ao fechar os recursos: " + e.getMessage());
             }
         }
 
         return produtosVendidos;
     }
 
-        
     
     public ArrayList<ProdutosDTO> listarProdutos() {
     String sql = "SELECT * FROM produtos"; // Consulta para buscar todos os produtos
